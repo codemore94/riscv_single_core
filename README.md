@@ -1,0 +1,2 @@
+# riscv_single_core
+"single-cycle-riscv-minimal-core_as_described_in_digital_design_and computer_architecture_riscv_edition_"
