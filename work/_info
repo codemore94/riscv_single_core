@@ -8,13 +8,13 @@ z2
 !i10e 25
 !i10f 100
 cModel Technology
-Z0 d/home/mikko/RV_SINGLE
+d/home/mikko/RV_SINGLE
 Erisv_single
-w1717240921
+w1717252770
 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 5
-R0
+!i122 7
+d/home/mikko/RV_SINGLE/riscv_single_core
 8riscvsingle.vhd
 Friscvsingle.vhd
 l0
@@ -23,9 +23,9 @@ V0ATl8RdKl<F<_Z43JQfZA1
 !s100 @mX>Y_oT_Qo_kGUe5@cd30
 OV;C;2020.1;71
 32
-!s110 1717240925
+!s110 1717252777
 !i10b 1
-!s108 1717240925.000000
+!s108 1717252777.000000
 !s90 -check_synthesis|riscvsingle.vhd|
 !s107 riscvsingle.vhd|
 !i113 1
