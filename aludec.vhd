@@ -28,5 +28,10 @@ begin
                            ALUControl <= "000"   --add,addi
                          end if;
         when "010" => ALUControl <= "101";       --slt, slti
-                      when "011" 
-                        
+        when "110" => ALUControl <= "010"        --and,andi
+        when "111" => ALUControl <= "---"  --unknown
+      end case;
+      end case;
+      end process;
+      end;
+
