@@ -1,49 +1,73 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity risv_single is
-  port(clk, reset           : in  std_logic;
-       PC                   : out std_logic_vector(31 downto 0);
-       Instr                : in  std_logic_vector(31 downto 0);
-       MemWrite             : out std_logic;
-       ALUResult, WriteData : out std_logic_vector(31 downto 0);
-       ReadData             : in  std_logic_vector(31 downto 0)
-       );
-end;
+entity controller is
+  port (
+    op       : in  std_logic_vector(6 downto 0);
+    funct3   : in  std_logic_vector(2 downto 0);
+    funct7b5 : in  std_logic;
+    Zero     : in  std_logic;
+    ResultSrc: out std_logic_vector(1 downto 0);
+    MemWrite : out std_logic;
+    PCSrc    : out std_logic;
+    AluSrc   : out std_logic;
+    RegWrite : out std_logic;
+    Jump     : out std_logic;
+    ImmSrc   : out std_logic_vector(1 downto 0);
+    ALUControl: out std_logic_vector(2 downto 0)
+  );
+end controller;
 
-architecture struct of risv_single is
-  component controller
-    port(
-      op             : in  std_logic_vector(6 downto 0);
-      funct3         : in  std_logic_vector(2 downto 0);
-      funct7b5, Zero : in  std_logic;
-      ResultSrc      : out std_logic_vector(1 downto 0);
-      MemWrite       : out std_logic;
-      PCSrc, ALUSrc  : out std_logic;
-      ImmSrc         : out std_logic_vector(1 downto 0);
-      ALUControl     : out std_logic_vector(2 downto 0)
-
-      );
+architecture struct of controller is
+  component maindec
+    port (
+      op        : in  std_logic_vector(6 downto 0);
+      ResultSrc : out std_logic_vector(1 downto 0);
+      MemWrite  : out std_logic;
+      Branch    : out std_logic;
+      AluSrc    : out std_logic;
+      ImmSrc    : out std_logic_vector(1 downto 0);
+      ALuOp     : out std_logic_vector(1 downto 0)
+    );
   end component;
 
-  component datapath
-    port(clk, reset           : in  std_logic;
-         ResultSrc            : in  std_logic_vector(1 downto 0);
-         PCSrc, ALUSrc        : in  std_logic;
-         RegWrite             : in  std_logic;
-         ImmSrc               : in  std_logic_vector(1 downto 0);
-         ALUControl           : in  std_logic_vector(2 downto 0);
-         Zero                 : out std_logic;
-         PC                   : out std_logic_vector(31 downto 0);
-         Instr                : in  std_logic_vector(31 downto 0);
-         ALUResult, WriteData : out std_logic_vector(31 downto 0);
-         ReadData             : in  std_logic_vector(31 downto 0)
-         );
+  component aludec
+    port (
+      op5      : in  std_logic; -- Changed to op5 to match signal slicing
+      funct3   : in  std_logic_vector(2 downto 0);
+      funct7b5 : in  std_logic;
+      ALuOp    : in  std_logic_vector(1 downto 0);
+      ALUControl : out std_logic_vector(2 downto 0)
+    );
   end component;
-  signal ALUSrc, RegWrite, Jump, Zero, PCSrc : std_logic;
-  signal ResultSrc, ImmSrc                   : std_logic_vector(1 downto 0);
-  signal ALUControl                          : std_logic_vector(2 downto 0);
+
+  signal ALuOp  : std_logic_vector(1 downto 0);
+  signal Branch : std_logic;
+
 begin
-  c  : controller port map(Instr(6 downto 0), Instr(14 downto 12), Instr(30), Zero, ResultSrc, MemWrite, PCSrc, ALUSrc, RegWrite, Jump, ImmSrc, ALUControl);
-  dp : datapath port map(clk, reset, ResultSrc, PCSrc, ALUSrc, RegWrite, ImmSrc, ALUControl, Zero, PC, Instr, ALUResult, WriteData, ReadData);
-end;
+  -- Instantiate maindec
+  md: maindec
+    port map (
+      op        => op,
+      ResultSrc => ResultSrc,
+      MemWrite  => MemWrite,
+      Branch    => Branch,
+      AluSrc    => AluSrc,
+      ImmSrc    => ImmSrc,
+      ALuOp     => ALuOp
+    );
+
+  -- Instantiate aludec
+  ad: aludec
+    port map (
+      op5       => op(5),
+      funct3    => funct3,
+      funct7b5  => funct7b5,
+      ALuOp     => ALuOp,
+      ALUControl => ALUControl
+    );
+
+  -- Logic for PCSrc
+  PCSrc <= (Branch and Zero) or Jump;
+
+end struct;
